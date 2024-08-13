@@ -1,6 +1,7 @@
 module integrator
     use kind_parameter, only: dp, i4
     use grids, only: grid
+    use forces
     
     implicit none
     private
@@ -8,10 +9,12 @@ module integrator
     public :: symp_integrator, force_func
 
     abstract interface
-        real(dp) function force_func(y1, y2) result(force)
+        real(dp) function force_func(y1, y2, f_param) result(force)
             import :: dp
+            import :: force_param
             !y1, y2: displacements
             real(dp), intent(in) :: y1, y2
+            type(force_param), intent(in) :: f_param
         end function 
     end interface
 
@@ -30,11 +33,12 @@ module integrator
 
 contains
     
-    type(grid) function symp_integrator(string, force, step_size, order) &
-            result(res)
+    type(grid) function symp_integrator(string, force, f_param, step_size, &
+            order) result(res)
 
         type(grid), intent(in) :: string
         procedure(force_func) :: force
+        type(force_param), intent(in) :: f_param
         real(dp), intent(in) :: step_size
         integer(i4), intent(in) :: order
 
@@ -57,7 +61,7 @@ contains
             res%y = res%y + step_size * symp_c(i, order) * res%v
 
             ! force on particles 1...(size - 1) from particle on the right
-            f = [(force(res%y(j), res%y(j + 1)), j = 1, res%size - 1)]
+            f = [(force(res%y(j), res%y(j + 1), f_param), j = 1, res%size - 1)]
             ! force on particles 2...(size - 1)
             f_tot(2:res%size - 1) = [(-f(j - 1) + f(j), j = 2, res%size - 1)]
             ! acceleration on the same particles            

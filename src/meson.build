@@ -3,5 +3,7 @@ srcs += files(
   'kind_parameter.f90',
   'constants.f90',
   'grids.f90',
-  'integrator.f90'
+  'integrator.f90',
+  'forces.f90',
+  'modes.f90'
   )
