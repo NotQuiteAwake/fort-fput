@@ -5,5 +5,6 @@ srcs += files(
   'grids.f90',
   'integrator.f90',
   'forces.f90',
-  'modes.f90'
+  'modes.f90',
+  'io.f90'
   )
