@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 from sys import stdin
-from data import Specs, Datapoint, Axes
+from utils import Specs, Datapoint, Axes
 
 def read_float_line(line:str):
     return [float(num) for num in line.split()]
