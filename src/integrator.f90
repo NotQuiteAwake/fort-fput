@@ -1,6 +1,6 @@
 module integrator
     use kind_parameter, only: dp, i4
-    use grids, only: grid
+    use strings, only: string
     use forces
     
     implicit none
@@ -9,12 +9,10 @@ module integrator
     public :: symp_integrator, force_func
 
     abstract interface
-        real(dp) function force_func(y1, y2, f_param) result(force)
+        real(dp) function force_func(dy, dx, k, alpha) result(force)
             import :: dp
-            import :: force_param
             !y1, y2: displacements
-            real(dp), intent(in) :: y1, y2
-            type(force_param), intent(in) :: f_param
+            real(dp), intent(in) :: dy, dx, k, alpha
         end function 
     end interface
 
@@ -33,44 +31,47 @@ module integrator
 
 contains
     
-    type(grid) function symp_integrator(string, force, f_param, step_size, &
-            order) result(res)
+    type(string) function symp_integrator(str, force, int_order, dt) result(res)
 
-        type(grid), intent(in) :: string
+        type(string), intent(in) :: str
         procedure(force_func) :: force
-        type(force_param), intent(in) :: f_param
-        real(dp), intent(in) :: step_size
-        integer(i4), intent(in) :: order
+        integer(i4), intent(in) :: int_order
+        real(dp), intent(in) :: dt
 
         integer(i4) :: i, j
-        real(dp), allocatable, dimension(:) :: f, f_tot
+        real(dp), allocatable, dimension(:) :: f, f_tot, dy
 
-        allocate(f(string%size), f_tot(string%size))
+        allocate(f(str%N), f_tot(str%N), dy(str%N))
 
         f = 0
         f_tot = 0
+        dy = 0
 
-        res = string
+        res = str
 
-        if (order > max_order .or. order < 1) then
+        if (int_order > max_order .or. int_order < 1) then
             write(*, *) "warning: symp_integrator cannot handle supplied order."
             return 
         end if
 
-        do i = 1, order
-            res%y = res%y + step_size * symp_c(i, order) * res%v
+        do i = 1, int_order
+            res%y = res%y + dt * symp_c(i, int_order) * res%v
+
+            dy = [(res%y(j + 1) - res%y(j), j = 1, str%N - 1)]
 
             ! force on particles 1...(size - 1) from particle on the right
-            f = [(force(res%y(j), res%y(j + 1), f_param), j = 1, res%size - 1)]
-            ! force on particles 2...(size - 1)
-            f_tot(2:res%size - 1) = [(-f(j - 1) + f(j), j = 2, res%size - 1)]
+            f = [(force(dy(j), str%dx, str%k, str%alpha), j = 1, str%N - 1)]
+
+            ! net force on particles 2...(size - 1)
+            f_tot(2:str%N - 1) = [(-f(j - 1) + f(j), j = 2, str%N - 1)]
+
             ! acceleration on the same particles            
-            res%a = f_tot / res%mass 
+            res%a = f_tot / str%m
             
-            res%v = res%v + step_size * symp_d(i, order) * res%a
+            res%v = res%v + dt * symp_d(i, int_order) * res%a
 
             ! check fixed BC
-            if (any(res%y([1, res%size]) /= 0)) then
+            if (any(res%y([1, str%N]) /= 0)) then
                 write(*, *) "warning: displacement changed on fixed boundary."
                 return
             end if
