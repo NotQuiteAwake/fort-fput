@@ -15,8 +15,7 @@ module configs
     
     type :: config
         integer(i4) :: N, init_mode, int_order, per_cycle
-        real(dp) :: dt, dx, rho, A, recur_thresh
-        real(dp) :: k, alpha
+        real(dp) :: dt, dx, rho, A, recur_thresh, k, alpha, T
     end type
 
 end module

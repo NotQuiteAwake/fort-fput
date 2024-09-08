@@ -1,5 +1,7 @@
 module io
-    use grids
+    use strings
+    use modes
+    use configs
     use kind_parameter, only: i4, dp
 
     implicit none
@@ -51,7 +53,56 @@ contains
         write(*, *) repeat(sep_used, num_used)
     end subroutine
 
+    subroutine read_params(conf, str)
+        type(config), intent(inout) :: conf
+        type(string), intent(inout) :: str
+        real(dp) :: period
 
+        read(*, *) conf%N, conf%dx, conf%rho
+        read(*, *) conf%per_cycle, conf%int_order
+        read(*, *) conf%init_mode, conf%A
+        read(*, *) conf%k, conf%alpha
+        read(*, *) conf%recur_thresh
+
+        str = create_string(conf%N, conf%dx, conf%rho, conf%k, conf%alpha)
+        str = gen_nth_normal(str, conf%init_mode, conf%A)
+
+        ! for more comparable results when init_mode changes.
+        ! since we use the fundamental the per_cycle must be large to preserve
+        ! detail in the higher frequencies.
+        conf%T = get_nth_period(str, 1)
+        conf%dt = conf%T / conf%per_cycle
+    end subroutine
+
+    subroutine write_params(conf)
+        type(config), intent(in) :: conf
+        call log_param("N", conf%N)
+        call log_param("dx", conf%dx)
+        call log_param("rho", conf%rho)
+
+        call log_param("per_cycle", conf%per_cycle)
+        call log_param("int_order", conf%int_order)
+
+        call log_param("init_mode", conf%init_mode)
+        call log_param("A", conf%A)
+        
+        call log_param("k", conf%k)
+        call log_param("alpha", conf%alpha)
+
+        call log_param("recur_thresh", conf%recur_thresh)
+
+        ! auxiliary info not part of the original config
+        call log_param("dt", conf%dt)
+        call log_param("T", conf%T)
+    end subroutine
+
+    subroutine log(str)
+        type(string), intent(in) :: str
+
+        call write_sep()
+        call log_dp_array(str%y)
+        call log_dp_array(decompose(str, NUM_MODES))
+    end subroutine
 
 end module
 

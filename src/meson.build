@@ -7,5 +7,6 @@ srcs += files(
   'forces.f90',
   'modes.f90',
   'io.f90',
-  'configs.f90'
+  'configs.f90',
+  'evolver.f90'
   )
