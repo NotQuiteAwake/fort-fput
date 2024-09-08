@@ -67,9 +67,10 @@ contains
 
     subroutine write_params()
         call log_param("N", conf%N)
-        call log_param("a", conf%dx)
+        call log_param("dx", conf%dx)
         call log_param("rho", conf%rho)
 
+        call log_param("per_cycle", conf%per_cycle)
         call log_param("dt", conf%dt)
         call log_param("int_order", conf%int_order)
 

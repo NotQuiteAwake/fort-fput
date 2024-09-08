@@ -3,21 +3,39 @@ from dataclasses import dataclass, field
 
 @dataclass
 class Specs:
-    lat_param:float = field(default_factory=float)
-    step_size:float = field(default_factory=float)
-    size:int = field(default_factory=int)
-    disp:list[float] = field(default_factory=list)
-    amp: float = field(default_factory=float)
+    N:int = field(default_factory=int)
+    dx:float = field(default_factory=float)
+    rho:float = field(default_factory=float)
 
-    def get_disp(self)->list[float]:
-        if self.disp:
-            return self.disp
+    dt:float = field(default_factory=float)
+
+    x:list[float] = field(default_factory=list)
+    A: float = field(default_factory=float)
+
+    def parse(self, conf_line:str):
+        assert(conf_line)
+
+        conf = conf_line.strip().split()
+        assert(conf[0] == '%')  # config marker
+        name = conf[1]
+        val = conf[2]
         
-        disp = [i * self.lat_param for i in range(self.size)]
-        return disp
+        # even when conceivable python magic still amazes me
+        if hasattr(self, name):
+            attr_type = type(getattr(self, name))
+            val = attr_type(val)
+            setattr(self, name, val)
+        # otherwise silently ignore attribute.
 
-    def get_length(self)->float:
-        return (self.size - 1) * self.lat_param
+    def get_x(self)->list[float]:
+        if self.x:
+            return self.x
+        
+        self.x = [i * self.dx for i in range(self.N)]
+        return self.x
+
+    def get_l(self)->float:
+        return (self.N - 1) * self.dx
 
 @dataclass
 class Datapoint:
@@ -33,21 +51,20 @@ class Axes:
         self.grid_shape = (2, 2)
 
         self.string_ax = plt.subplot2grid(self.grid_shape, (0, 0))  
-
         self.modes_ax = plt.subplot2grid(self.grid_shape, (0, 1))
-
         self.modes_time_ax = plt.subplot2grid(self.grid_shape, (1, 0), colspan = 2)
 
         plt.tight_layout() 
+        plt.subplots_adjust(top=0.95)
 
     def plot_string(self, dp: Datapoint, specs:Specs):
-        disp = specs.get_disp()
+        x = specs.get_x()
 
         self.string_ax.clear()
         self.string_ax.set_title('Displacements')
-        self.string_ax.set_xlim(disp[0], disp[-1])
-        self.string_ax.set_ylim(-1.1 * specs.amp, 1.1 * specs.amp)
-        self.string_ax.plot(disp, dp.string)
+        self.string_ax.set_xlim(x[0], x[-1])
+        self.string_ax.set_ylim(-1.1 * specs.A, 1.1 * specs.A)
+        self.string_ax.plot(x, dp.string)
 
     def plot_modes(self, dp: Datapoint):
         num_modes = dp.get_num_modes()
@@ -57,7 +74,7 @@ class Axes:
         self.modes_ax.grid(True)
         self.modes_ax.set_xlim(0, num_modes + 1)
         self.modes_ax.set_ylim(-1.1, 1.1)
-        # TODO: plot modes lines to x-axis
+
         for i in range(num_modes):
             mode = dp.modes[i]
             self.modes_ax.plot([i + 1, i + 1], [0, mode],
@@ -84,7 +101,7 @@ class Axes:
             comps = [abs(d.modes[i]) for d in data[-max_length:]]
             self.modes_time_ax.plot(times, comps, label=i)
 
-        self.modes_time_ax.legend()
+        self.modes_time_ax.legend(loc = 'upper left')
 
     def plot(self, data:list[Datapoint], specs:Specs):
         self.plot_string(data[-1], specs)
