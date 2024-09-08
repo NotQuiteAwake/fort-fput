@@ -10,21 +10,27 @@ program fput
     implicit none
 
     type(string) :: str 
-    integer :: i
     type(config) :: conf
+    real(dp) :: last = 0.0_dp, t = 0.0_dp, period
 
     conf = read_params()
     call write_params()
 
     str = create_string(conf%N, conf%dx, conf%rho, conf%k, conf%alpha)
     str = gen_nth_normal(str, conf%init_mode, conf%A)
+    period = get_nth_period(str, conf%init_mode)
 
-    do i = 1, conf%init_steps
+    ! add patience for string to evolve out of initial eigenmode
+    do while (t - last <= period)
         call log()
         call evolve()
+        t = t + conf%dt
+        if (thresh_met(str, conf%init_mode, conf%recur_thresh)) then
+            last = t
+        end if
     end do
 
-    do while (abs(1 - abs(get_comp(str, conf%init_mode))) > conf%recur_thresh)
+    do while (.not. thresh_met(str, conf%init_mode, conf%recur_thresh))
         call log()
         call evolve()
     end do
@@ -33,10 +39,18 @@ contains
 
     type(config) function read_params() result(conf)
         read(*, *) conf%N, conf%dx, conf%rho
-        read(*, *) conf%init_steps, conf%dt, conf%int_order
+        read(*, *) conf%dt, conf%int_order
         read(*, *) conf%init_mode, conf%A
         read(*, *) conf%k, conf%alpha
         read(*, *) conf%recur_thresh
+    end function
+
+    logical function thresh_met(str, init_mode, recur_thresh)
+        type(string) :: str
+        integer(i4) :: init_mode
+        real(dp) :: recur_thresh
+
+        thresh_met = abs(get_comp(str, init_mode)) > recur_thresh
     end function
 
     subroutine write_params()
@@ -44,7 +58,6 @@ contains
         call log_param("a", conf%dx)
         call log_param("rho", conf%rho)
 
-        call log_param("init_steps", conf%init_steps)
         call log_param("dt", conf%dt)
         call log_param("int_order", conf%int_order)
 

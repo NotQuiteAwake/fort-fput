@@ -7,6 +7,19 @@ module modes
 
 contains
 
+    real(dp) function get_nth_period(str, mode) result(period)
+        type(string) :: str
+        integer(i4) :: mode
+        
+        real(dp) :: wvec, omega
+
+        ! wvec for wavevector, to differentiate from spring constant k
+        wvec = mode * PI / str%l
+        omega = wvec * sqrt(str%k / str%rho) 
+        
+        period = 2 * PI / omega
+    end function
+
     type(string) function gen_nth_normal(str, mode, amp) result(res)
         type(string), intent(in) :: str
         integer(i4), intent(in) :: mode ! n-th normal mode

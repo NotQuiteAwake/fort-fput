@@ -14,10 +14,8 @@ module configs
     integer(i4), parameter :: OUTLEN = 20, NUM_MODES = 20
     
     type :: config
-        integer(i4) :: N, init_steps, init_mode, int_order
+        integer(i4) :: N, init_mode, int_order
         real(dp) :: dt, dx, rho, A, recur_thresh
-        ! k understood as string tension;
-        ! alpha is dimensionless nonlinearity coefficient
         real(dp) :: k, alpha
     end type
 

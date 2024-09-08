@@ -49,8 +49,9 @@ contains
         end if
 
         write(*, *) repeat(sep_used, num_used)
-
     end subroutine
+
+
 
 end module
 
