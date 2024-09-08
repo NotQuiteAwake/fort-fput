@@ -14,14 +14,14 @@ contains
         character(*), intent(in) :: name
         real(dp), intent(in) :: param
 
-        write(*, '(A2, A20, F8.3)') '% ', name, param
+        write(*, '(A2, A15, F10.4)') '% ', name, param
     end subroutine
 
     subroutine log_param_int(name, param)
         character(*), intent(in) :: name
         integer(i4), intent(in) :: param
 
-        write(*, '(A2, A20, I8)') '% ', name, param
+        write(*, '(A2, A15, I10)') '% ', name, param
     end subroutine
 
     subroutine log_dp_array(array)

@@ -8,8 +8,8 @@ module modes
 contains
 
     real(dp) function get_nth_period(str, mode) result(period)
-        type(string) :: str
-        integer(i4) :: mode
+        type(string), intent(in) :: str
+        integer(i4), intent(in) :: mode
         
         real(dp) :: wvec, omega
 
