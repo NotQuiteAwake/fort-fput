@@ -8,6 +8,7 @@ class Specs:
     rho:float = field(default_factory=float)
 
     dt:float = field(default_factory=float)
+    T:float = field(default_factory=float)
 
     x:list[float] = field(default_factory=list)
     A: float = field(default_factory=float)
@@ -47,7 +48,8 @@ class Datapoint:
         return len(self.modes)
 
 class Axes:
-    def __init__(self):
+    def __init__(self, modes_window:int):
+        self.modes_window = modes_window
         self.grid_shape = (2, 2)
 
         self.string_ax = plt.subplot2grid(self.grid_shape, (0, 0))  
@@ -85,21 +87,20 @@ class Axes:
                                ) 
 
     def plot_mode_time(self, data:list[Datapoint]):
-        max_length = 400
         num_modes = data[-1].get_num_modes()
 
         self.modes_time_ax.clear()
         self.modes_time_ax.set_title('Mode amplitudes over time')
         self.modes_time_ax.set_ylim(0, 1)
 
-        times = [d.time for d in data[-max_length:]]
+        times = [d.time for d in data[-self.modes_window:]]
         self.modes_time_ax.set_xlim(times[0], times[-1])
 
         # more modes will just be confusing
         for i in range(min(num_modes, 5)):
             # longer times will just be a mess
-            comps = [abs(d.modes[i]) for d in data[-max_length:]]
-            self.modes_time_ax.plot(times, comps, label=i)
+            comps = [abs(d.modes[i]) for d in data[-self.modes_window:]]
+            self.modes_time_ax.plot(times, comps, label=i+1)
 
         self.modes_time_ax.legend(loc = 'upper left')
 

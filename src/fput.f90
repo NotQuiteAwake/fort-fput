@@ -16,4 +16,5 @@ program fput
 
     call evolve_while_thresh_met(str, t, conf)
     call evolve_outside_thresh(str, t, conf)
+    call evolve_while_thresh_met(str, t, conf)
 end program

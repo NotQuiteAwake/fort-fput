@@ -15,7 +15,6 @@ def read_float_line(line:str):
 if __name__ == '__main__':
     os.makedirs(FIG_DIR, exist_ok = True)
 
-    axes:Axes = Axes() 
     specs:Specs = Specs()
     data:list[Datapoint] = []
     count:int = 0
@@ -42,6 +41,10 @@ if __name__ == '__main__':
     dt_frames:float = specs.dt * sampling_steps
     fps:float = 1.0 / dt_frames
 
+    # plot 5 periods' worth of data points in the modes-time plot
+    modes_window:int = int(5.0 * specs.T / dt_frames)
+    axes:Axes = Axes(modes_window) 
+
     for line in stdin:
         line = line.strip()
 
@@ -58,7 +61,8 @@ if __name__ == '__main__':
 
                 string_read = True
             else:
-                data[-1].modes = read_float_line(line)
+                point = data[-1]
+                point.modes = read_float_line(line)
                 string_read = False
 
                 axes.plot(data, specs)
@@ -70,10 +74,11 @@ if __name__ == '__main__':
                 if (sample_count + 1) % 10 == 0:
                     print()
 
-#                 if sample_count > 100:
+#                 if count * specs.dt > 15:
 #                     break
 
     cmd = CMD.format(fps = fps, fig_dir = FIG_DIR)
+    print()
     print(cmd)
 
     subprocess.run(cmd.split()) 

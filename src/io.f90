@@ -56,7 +56,6 @@ contains
     subroutine read_params(conf, str)
         type(config), intent(inout) :: conf
         type(string), intent(inout) :: str
-        real(dp) :: period
 
         read(*, *) conf%N, conf%dx, conf%rho
         read(*, *) conf%per_cycle, conf%int_order
