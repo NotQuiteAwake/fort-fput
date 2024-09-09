@@ -13,7 +13,13 @@ ninja -C build/
 ```
 
 and the binary will reside at `build/fput`. Python code in `pysrc` is mainly for
-plotting, and its main function resides in `plot.py`. The programs all read and
-write to stdin/stdout; Make use of pipes in shell to redirect to and from files.
+plotting, and its main function resides in `plot.py`.
+
+The programs all read and write to stdin/stdout; Make use of pipes in shell to
+redirect to and from files.
+
+## Demo
+
+https://github.com/user-attachments/assets/d4814134-2bff-4c7c-816a-94a09fa1d5c1
 
 License: MIT.
