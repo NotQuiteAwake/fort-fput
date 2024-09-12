@@ -7,7 +7,7 @@ module io
     implicit none
 
     interface log_param
-        module procedure log_param_dp, log_param_int
+        module procedure log_param_dp, log_param_int, log_param_char
     end interface
 
 contains
@@ -24,6 +24,12 @@ contains
         integer(i4), intent(in) :: param
 
         write(*, '(A2, A15, I10)') '% ', name, param
+    end subroutine
+
+    subroutine log_param_char(name, param)
+        character(*), intent(in) :: name, param
+
+        write(*, '(A2, A15, 4X, A)') '% ', name, trim(adjustl(param))
     end subroutine
 
     subroutine log_dp_array(array)
@@ -57,6 +63,7 @@ contains
         type(config), intent(inout) :: conf
         type(string), intent(inout) :: str
 
+        read(*, *) conf%operation
         read(*, *) conf%N, conf%dx, conf%rho
         read(*, *) conf%per_cycle, conf%int_order
         read(*, *) conf%init_mode, conf%A
@@ -75,6 +82,7 @@ contains
 
     subroutine write_params(conf)
         type(config), intent(in) :: conf
+        call log_param("operation", conf%operation)
         call log_param("N", conf%N)
         call log_param("dx", conf%dx)
         call log_param("rho", conf%rho)

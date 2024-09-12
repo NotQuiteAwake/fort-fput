@@ -14,6 +14,7 @@ module configs
     integer(i4), parameter :: NUM_MODES = 20
     
     type :: config
+        character(len=20) :: operation
         integer(i4) :: N, init_mode, int_order, per_cycle
         real(dp) :: dt, dx, rho, A, recur_thresh, k, alpha, T
     end type

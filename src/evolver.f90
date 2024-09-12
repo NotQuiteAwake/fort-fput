@@ -11,22 +11,27 @@ module evolver
 
 contains
 
-    subroutine evolve_outside_thresh(str, t, conf)
+    subroutine evolve_outside_thresh(str, t, conf, output)
         type(string), intent(inout) :: str
         real(dp), intent(inout) :: t
         type(config), intent(in) :: conf
+        logical, intent(in) :: output
 
         do while (.not. thresh_met(str, conf%init_mode, conf%recur_thresh))
-            call log(str)
+            if (output) then
+                call log(str)
+            end if
+
             call evolve(str, conf%int_order, conf%dt)
             t = t + conf%dt
         end do
     end subroutine
 
-    subroutine evolve_while_thresh_met(str, t, conf)
+    subroutine evolve_while_thresh_met(str, t, conf, output)
         type(string), intent(inout) :: str
         real(dp), intent(inout) :: t
         type(config), intent(in) ::conf
+        logical, intent(in) :: output
 
         real(dp) :: last, period
 
@@ -34,7 +39,10 @@ contains
         last = t 
 
         do while (t - last <= period)
-            call log(str)
+            if (output) then
+                call log(str)
+            end if
+
             call evolve(str, conf%int_order, conf%dt)
             t = t + conf%dt
             if (thresh_met(str, conf%init_mode, conf%recur_thresh)) then
