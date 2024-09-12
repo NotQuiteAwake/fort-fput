@@ -1,17 +1,28 @@
+import textwrap
+
 import matplotlib.pyplot as plt
 from dataclasses import dataclass, field
 
 @dataclass
 class Specs:
+    operation:str = field(default_factory=str)
     N:int = field(default_factory=int)
     dx:float = field(default_factory=float)
     rho:float = field(default_factory=float)
+
+    per_cycle:int = field(default_factory=int)
+
+    int_order:int = field(default_factory=int)
+    init_mode:int = field(default_factory=int)
+    A:float = field(default_factory=float)
+    k:float = field(default_factory=float)
+    alpha:float = field(default_factory=float)
+    recur_thresh:float = field(default_factory=float)
 
     dt:float = field(default_factory=float)
     T:float = field(default_factory=float)
 
     x:list[float] = field(default_factory=list)
-    A: float = field(default_factory=float)
 
     def parse(self, conf_line:str):
         assert(conf_line)
@@ -37,6 +48,17 @@ class Specs:
 
     def get_l(self)->float:
         return (self.N - 1) * self.dx
+
+    def export(self)->str:
+        conf:str = textwrap.dedent(f"""\
+            {self.operation}
+            {self.N}     {self.dx}      {self.rho}
+            {self.per_cycle}    {self.int_order}
+            {self.init_mode}    {self.A}
+            {self.k}    {self.alpha}
+            {self.recur_thresh}""")
+
+        return conf
 
 @dataclass
 class Datapoint:
