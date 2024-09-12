@@ -16,23 +16,29 @@ module integrator
         end function 
     end interface
 
-    integer(i4), parameter :: max_order = 3
-    real(dp), parameter, dimension(3, 3) :: symp_c = transpose(reshape([ &
-        1.0_dp, 0.0_dp, 0.0_dp, &
-        0.0_dp, 1.0_dp, 0.0_dp, &
-        1.0_dp, -2.0_dp / 3.0_dp, 2.0_dp / 3.0_dp &
-        ], [3, 3]))
+    integer(i4), parameter :: max_order = 4
 
-    real(dp), parameter, dimension(3, 3) :: symp_d = transpose(reshape([ &
-        1.0_dp, 0.0_dp, 0.0_dp, &
-        0.5_dp, 0.5_dp, 0.0_dp, &
-        1.0_dp / 24.0_dp , -3.0_dp / 4.0_dp, 7.0_dp / 24.0_dp &
-        ], [3, 3]))
+    real(dp), parameter :: twocr = 2.0_dp ** (1.0/3.0_dp)  ! cube root of 2
+    real(dp), parameter :: tmtcr = 2.0_dp - twocr   ! 2 - cube root of 2
+    real(dp), parameter :: omtcr = 1.0_dp - twocr   ! 1 - cube root of 2
+
+    real(dp), parameter, dimension(max_order, max_order) :: symp_c = reshape([ &
+        1.0_dp, 0.0_dp, 0.0_dp, 0.0_dp,&
+        0.0_dp, 1.0_dp, 0.0_dp, 0.0_dp,&
+        1.0_dp, -2.0/3.0_dp, 2.0/3.0_dp, 0.0_dp,&
+        1/(2*tmtcr), omtcr/(2*tmtcr), omtcr/(2*tmtcr), 1/(2*tmtcr)&
+        ], [max_order, max_order])
+
+    real(dp), parameter, dimension(max_order, max_order) :: symp_d = reshape([ &
+        1.0_dp, 0.0_dp, 0.0_dp, 0.0_dp,&
+        0.5_dp, 0.5_dp, 0.0_dp, 0.0_dp,&
+        -1.0/24.0_dp, 3.0/4.0_dp, 7.0/24.0_dp, 0.0_dp,&
+        1/tmtcr, -twocr/tmtcr, 1/tmtcr, 0.0_dp& 
+        ], [max_order, max_order])
 
 contains
     
     type(string) function symp_integrator(str, force, int_order, dt) result(res)
-
         type(string), intent(in) :: str
         procedure(force_func) :: force
         integer(i4), intent(in) :: int_order
@@ -54,8 +60,9 @@ contains
             return 
         end if
 
-        do i = 1, int_order
+        do i = int_order, 1, -1
             res%y = res%y + dt * symp_c(i, int_order) * res%v
+!            write(*, *) i, symp_c(i, int_order), symp_d(i, int_order)
 
             dy = [(res%y(j + 1) - res%y(j), j = 1, str%N - 1)]
 

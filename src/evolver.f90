@@ -38,7 +38,7 @@ contains
         period = get_nth_period(str, conf%init_mode)
         last = t 
 
-        do while (t - last <= period)
+        do while (t - last <= period * 2)
             if (output) then
                 call log(str)
             end if
