@@ -26,7 +26,7 @@ def time_sim(A:float, alpha:float, **kwargs):
     for key, val in kwargs.items():
         setattr(specs, key, val)
 
-    print(f"A = {A:.2f}, alpha = {alpha:.2f}")
+    print(f"A = {A:.2f}, alpha = {alpha:.4f}")
 
     p = sp.run(FPUT, input=specs.export(), capture_output=True, text=True)
     time = float(p.stdout)
@@ -68,13 +68,25 @@ def time_alpha_plot(A:float, alpha:npt.NDArray):
     plt.savefig('time-alpha.pdf')
     plt.show()
 
+    # log-log plot
     log_alpha = np.log(alpha)
     log_t = np.log(t)
-    plt.plot(log_alpha, log_t)
+    plt.plot(log_alpha, log_t, label = 'measured', color = 'blue')
+
+    a, b = np.polyfit(log_alpha, log_t, deg=1)
+    log_t_linear = a * log_alpha + b
+    plt.plot(log_alpha,
+             log_t_linear,
+             label = f'$a = {a:.3f}$, $b = {b:.3f}$',
+             linestyle = 'dotted',
+             color = 'green'
+             )
+
     plt.title("log-log plot, recurrence time and $\\alpha$")
     plt.xlim(min(log_alpha), max(log_alpha))
     plt.xlabel("$\\log \\alpha$")
     plt.ylabel("Time $t/s$")
+    plt.legend(loc = "upper right")
     plt.savefig("log-log.pdf")
     plt.show()
 
@@ -87,7 +99,7 @@ def main():
     # alpha = np.linspace(0.1, 0.2, 20)
     # A_alpha_heatmap(A, alpha)
 
-    time_alpha_plot(A = 1, alpha = np.linspace(0.025, 0.3, 100))
+    time_alpha_plot(A=1, alpha=np.linspace(0.025, 0.3, 100))
 
 if __name__ == "__main__":
     main()    
