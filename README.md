@@ -20,6 +20,6 @@ redirect to and from files.
 
 ## Demo
 
-https://github.com/user-attachments/assets/d4814134-2bff-4c7c-816a-94a09fa1d5c1
+https://github.com/user-attachments/assets/22d32b9c-05b8-4b75-bb52-f8a3733b37ea
 
 License: MIT.
